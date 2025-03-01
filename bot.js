@@ -124,6 +124,10 @@ client.on('message', async msg => {
 });
 
 
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Bot rodando na porta ${port}`);
+});
 
 
 
