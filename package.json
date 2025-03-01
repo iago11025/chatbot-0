@@ -1,7 +1,14 @@
 {
+  "name": "chatbot-iago",
+  "version": "1.0.0",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
   "dependencies": {
-    "moment-timezone": "^0.5.45",
+    "express": "^4.18.2",
+    "whatsapp-web.js": "^1.23.0",
     "qrcode-terminal": "^0.12.0",
-    "whatsapp-web.js": ""
+    "dotenv": "^16.0.0"
   }
 }
