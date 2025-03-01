@@ -1,15 +1,22 @@
 // leitor de qr code
 const qrcode = require('qrcode-terminal');
-const { Client, Buttons, List, MessageMedia } = require('whatsapp-web.js'); // Mudança Buttons
-const client = new Client();
+const express = require('express'); // Adicionando express
+const { Client, Buttons, List, MessageMedia, LocalAuth } = require('whatsapp-web.js');
+const client = new Client({
+    authStrategy: new LocalAuth()
+});
+const app = express(); // Definindo o app
+
 // serviço de leitura do qr code
 client.on('qr', qr => {
     qrcode.generate(qr, { small: true });
 });
+
 // apos isso ele diz que foi tudo certo
 client.on('ready', () => {
     console.log('Tudo certo! WhatsApp conectado.');
 });
+
 // E inicializa tudo 
 client.initialize();
 
@@ -19,11 +26,11 @@ const delay = ms => new Promise(res => setTimeout(res, ms)); // Função que usa
 client.on('message', async msg => {
     if (msg.body.match(/(menu|Menu|dia|tarde|noite|oi|Oi|Olá|olá|ola|Ola|Marcar|Consulta|Agendamento)/i) && msg.from.endsWith('@c.us')) {
         const chat = await msg.getChat();
-        await delay(3000); // Delay de 3 segundos
-        await chat.sendStateTyping(); // Simulando Digitação
-        await delay(3000); // Delay de 3000 milissegundos mais conhecido como 3 segundos
-        const contact = await msg.getContact(); // Pegando o contato
-        const name = contact.pushname; // Pegando o nome do contato
+        await delay(3000);
+        await chat.sendStateTyping();
+        await delay(3000);
+        const contact = await msg.getContact();
+        const name = contact.pushname;
         await client.sendMessage(
             msg.from,
             `Olá! ${name.split(" ")[0]}, sou o assistente virtual do Dr. Iago Mateó. Como posso ajudá-lo hoje? Por favor, digite uma das opções abaixo:\n\n` +
@@ -33,7 +40,7 @@ client.on('message', async msg => {
             `4 - Como funciona a 1ª consulta?\n` +
             `5 - Outras perguntas.\n` +
             `"Menu" - Voltar ao menu principal.`
-        ); // Primeira mensagem de texto
+        );
     }
 
     if (msg.body === '0' && msg.from.endsWith('@c.us')) {
@@ -79,11 +86,6 @@ client.on('message', async msg => {
         await chat.sendStateTyping();
         await delay(3000);
         await client.sendMessage(msg.from, 'Escreva o número correspondente à unidade desejada.');
-
-        await delay(20000);
-        await chat.sendStateTyping();
-        await delay(20000);
-        await client.sendMessage(msg.from, 'Obrigado! Entraremos em contato com mais informações sobre o agendamento e sua unidade selecionada 😉. \n\nCaso tenha mais dúvidas, digite "2" para falar diretamente com o assistente humanizado.');
     }
 
     if (msg.body === '4' && msg.from.endsWith('@c.us')) {
@@ -94,21 +96,7 @@ client.on('message', async msg => {
         await client.sendMessage(
             msg.from,
             '🦷✨ **Uma consulta que faz a diferença para a sua autoestima!** ✨🦷\n\n' +
-            '🔹 **Mais do que apenas olhar os dentes:** Nosso atendimento vai além, proporcionando uma experiência completa e personalizada.\n\n' +
-            '🔹 **Entender a sua queixa:** Antes de qualquer exame, dedicamos tempo para entender sua queixa principal e alinhar expectativas.\n\n' +
-            '🔹 **Exame clínico minucioso:** Avaliamos não apenas dentes e gengivas, mas também toda a estrutura da boca e face, função mastigatória e estética do sorriso.\n\n' +
-            '🔹 **Uso da câmera intraoral:** Uma das tecnologias que usamos no atendimento que permite visualizar detalhes da sua saúde bucal em tempo real, garantindo um diagnóstico ainda mais preciso.\n\n' +
-            '🔹 **Exames complementares (se necessário):** Para uma avaliação detalhada e personalizada.\n\n' +
-            '🔹 **Plano de tratamento personalizado:** Desenvolvido de acordo com as suas necessidades e expectativas do resultado final.\n\n' +
-            '🔹 **Atendimento humanizado e transparente:** Ambiente acolhedor, com um compromisso genuíno com sua saúde, bem-estar e satisfação.'
-        );
-        await delay(3000);
-        await chat.sendStateTyping();
-        await delay(3000);
-        await client.sendMessage(
-            msg.from,
-            '✨ Nosso compromisso não é apenas com a sua saúde bucal, mas com o seu bem-estar e satisfação.\n\n' +
-            'Se você valoriza um atendimento que vai além do básico, que entrega qualidade, segurança e um olhar atento para os mínimos detalhes, agende sua consulta e descubra um novo padrão de cuidado odontológico. \n\n 📞- Para agendar a sua consulta, digite "1".'
+            '🔹 **Mais do que apenas olhar os dentes:** Nosso atendimento vai além, proporcionando uma experiência completa e personalizada.'
         );
     }
 
@@ -117,17 +105,15 @@ client.on('message', async msg => {
         await delay(3000);
         await chat.sendStateTyping();
         await delay(3000);
-        await client.sendMessage(msg.from, 'Olá, Qual é a sua dúvida? 💭  \n\n Deixe a sua pergunta aqui no chat e entraremos em contato o mais rápido possível 😉.');
+        await client.sendMessage(msg.from, 'Olá, Qual é a sua dúvida? 💭\n\n Deixe a sua pergunta aqui no chat e entraremos em contato o mais rápido possível 😉.');
     }
-
-    
 });
-
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Bot rodando na porta ${port}`);
 });
+
 
 
 
