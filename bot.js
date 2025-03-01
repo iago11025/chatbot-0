@@ -128,9 +128,4 @@ client.on('message', async msg => {
 
 
 
-git init
-git add .
-git commit -m "Primeiro commit"
-git remote add origin https://github.com/SEU-USUARIO/whatsapp-bot.git
-git branch -M main
-git push -u origin main
+
