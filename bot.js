@@ -1,8 +1,9 @@
-const qrcode = require('qrcode-terminal');
+const qrcode = require('qrcode');
 const express = require('express');
 const { Client, LocalAuth } = require('whatsapp-web.js');
 require('dotenv').config();
 
+let qrGerado = false;
 const client = new Client({
     authStrategy: new LocalAuth()
 });
@@ -15,8 +16,16 @@ app.get('/', (req, res) => {
 
 // Leitura do QR Code
 client.on('qr', qr => {
-    qrcode.generate(qr, { small: true });
-    console.log('QR Code gerado, escaneie com seu WhatsApp');
+    if (!qrGerado) {
+        console.log("Escaneie o QR Code abaixo:");
+        qrcode.toString(qr, { type: 'terminal' }, (err, qrCode) => {
+            console.log(qrCode);
+        });
+        qrcode.toDataURL(qr, (err, url) => {
+            console.log("Ou acesse o link para escanear: " + url);
+        });
+        qrGerado = true;
+    }
 });
 
 // Conexão realizada
@@ -68,6 +77,7 @@ client.on('message', async msg => {
 app.listen(port, () => {
     console.log(`🔥 Bot rodando na porta ${port}`);
 });
+
 
 
 
