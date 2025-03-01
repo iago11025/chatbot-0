@@ -1,118 +1,74 @@
-// leitor de qr code
 const qrcode = require('qrcode-terminal');
-const express = require('express'); // Adicionando express
-const { Client, Buttons, List, MessageMedia, LocalAuth } = require('whatsapp-web.js');
+const express = require('express');
+const { Client, LocalAuth } = require('whatsapp-web.js');
+require('dotenv').config();
+
 const client = new Client({
     authStrategy: new LocalAuth()
 });
-const app = express(); // Definindo o app
+const app = express();
+const port = process.env.PORT || 3000;
 
-// serviço de leitura do qr code
+app.get('/', (req, res) => {
+    res.send('Bot do Dr. Iago Mateó está ONLINE 🦷✨');
+});
+
+// Leitura do QR Code
 client.on('qr', qr => {
     qrcode.generate(qr, { small: true });
+    console.log('QR Code gerado, escaneie com seu WhatsApp');
 });
 
-// apos isso ele diz que foi tudo certo
+// Conexão realizada
 client.on('ready', () => {
-    console.log('Tudo certo! WhatsApp conectado.');
+    console.log('✅ Tudo certo! WhatsApp conectado.');
 });
 
-// E inicializa tudo 
 client.initialize();
 
-const delay = ms => new Promise(res => setTimeout(res, ms)); // Função que usamos para criar o delay entre uma ação e outra
+// Função de Delay
+const delay = ms => new Promise(res => setTimeout(res, ms));
 
-// Funil
+// Atendimento Automático
 client.on('message', async msg => {
-    if (msg.body.match(/(menu|Menu|dia|tarde|noite|oi|Oi|Olá|olá|ola|Ola|Marcar|Consulta|Agendamento)/i) && msg.from.endsWith('@c.us')) {
-        const chat = await msg.getChat();
-        await delay(3000);
-        await chat.sendStateTyping();
-        await delay(3000);
+    if (msg.body.match(/(menu|Menu|oi|Oi|Olá|olá)/i) && msg.from.endsWith('@c.us')) {
         const contact = await msg.getContact();
-        const name = contact.pushname;
-        await client.sendMessage(
-            msg.from,
-            `Olá! ${name.split(" ")[0]}, sou o assistente virtual do Dr. Iago Mateó. Como posso ajudá-lo hoje? Por favor, digite uma das opções abaixo:\n\n` +
-            `1 - Agende sua consulta.\n` +
-            `2 - Fale diretamente com o atendente humano.\n` +
-            `3 - Localização do consultório.\n` +
-            `4 - Como funciona a 1ª consulta?\n` +
-            `5 - Outras perguntas.\n` +
-            `"Menu" - Voltar ao menu principal.`
-        );
+        const name = contact.pushname.split(" ")[0];
+
+        await msg.reply(`Olá, ${name}! Sou o assistente virtual do **Instituto Iago Mateó** 🦷✨.\n\nEscolha uma opção abaixo:\n\n` +
+            `1️⃣ - Agendar Consulta\n` +
+            `2️⃣ - Falar com Atendente Humano\n` +
+            `3️⃣ - Localização do Consultório\n` +
+            `4️⃣ - Como funciona a 1ª consulta?\n` +
+            `5️⃣ - Dúvidas Gerais\n` +
+            `"Menu" - Voltar ao Menu Principal`);
     }
 
-    if (msg.body === '0' && msg.from.endsWith('@c.us')) {
-        await client.sendMessage(msg.from, 'Você retornou ao menu principal. Digite "menu" para iniciar novamente.');
+    if (msg.body === '1') {
+        await msg.reply('📅 Para agendar sua consulta, envie o nome completo e a disponibilidade de horários.\n\nResponderemos o mais rápido possível.');
     }
 
-    if (msg.body === '1' && msg.from.endsWith('@c.us')) {
-        const chat = await msg.getChat();
-        await delay(3000);
-        await chat.sendStateTyping();
-        await delay(3000);
-        await client.sendMessage(msg.from, '📞 Atendemos de segunda a sexta das 09:00 às 18:00 e aos sábados das 09:00 às 14:00.\n\nResponderemos o mais rápido possível sobre as datas e horários disponíveis na semana.\n\nAgradecemos o contato 🦷✨');
-        await delay(3000);
-        await chat.sendStateTyping();
-        await delay(3000);
-        await client.sendMessage(msg.from, 'Acompanhe o Instagram: https://www.instagram.com/dr.iagomateo/');
+    if (msg.body === '2') {
+        await msg.reply('Nos diga o motivo do contato que um atendente humano irá te responder em breve!');
     }
 
-    if (msg.body === '2' && msg.from.endsWith('@c.us')) {
-        const chat = await msg.getChat();
-        await delay(3000);
-        await chat.sendStateTyping();
-        await delay(3000);
-        await client.sendMessage(msg.from, 'Para agilizar o atendimento, qual seria o motivo do contato?\n\n(Escreva em poucas palavras).');
-        await delay(3000);
-        await chat.sendStateTyping();
-        await delay(3000);
-        await client.sendMessage(msg.from, 'Responderemos o mais rápido possível 😉');
+    if (msg.body === '3') {
+        await msg.reply('📍 Nosso consultório fica localizado na Pituba, Salvador-BA.\n\nGoogle Maps: https://maps.app.goo.gl/JSpWxErANzAQW3gR7');
     }
 
-    if (msg.body === '3' && msg.from.endsWith('@c.us')) {
-        const chat = await msg.getChat();
-        await delay(3000);
-        await chat.sendStateTyping();
-        await delay(3000);
-        await client.sendMessage(
-            msg.from,
-            'O Dr. Iago Mateó atende nos seguintes locais:\n\n' +
-            '6 - Atelier Bucal (Rua Frederico Edelweis, 23 - Rio Vermelho, Salvador - BA, 41940-270)\n\n' +
-            '7 - Odonto Vale (Avenida Vale das Pedrinhas, 609 - Rio Vermelho, Salvador - BA, 41905-615)'
-        );
-        await delay(3000);
-        await chat.sendStateTyping();
-        await delay(3000);
-        await client.sendMessage(msg.from, 'Escreva o número correspondente à unidade desejada.');
+    if (msg.body === '4') {
+        await msg.reply('🦷✨ **A 1ª consulta é o primeiro passo para o seu sorriso perfeito!**\n\nNa avaliação inicial fazemos:\n\n- Exame clínico completo\n- Escaneamento digital (se necessário)\n- Planejamento do tratamento');
     }
 
-    if (msg.body === '4' && msg.from.endsWith('@c.us')) {
-        const chat = await msg.getChat();
-        await delay(3000);
-        await chat.sendStateTyping();
-        await delay(3000);
-        await client.sendMessage(
-            msg.from,
-            '🦷✨ **Uma consulta que faz a diferença para a sua autoestima!** ✨🦷\n\n' +
-            '🔹 **Mais do que apenas olhar os dentes:** Nosso atendimento vai além, proporcionando uma experiência completa e personalizada.'
-        );
-    }
-
-    if (msg.body === '5' && msg.from.endsWith('@c.us')) {
-        const chat = await msg.getChat();
-        await delay(3000);
-        await chat.sendStateTyping();
-        await delay(3000);
-        await client.sendMessage(msg.from, 'Olá, Qual é a sua dúvida? 💭\n\n Deixe a sua pergunta aqui no chat e entraremos em contato o mais rápido possível 😉.');
+    if (msg.body === '5') {
+        await msg.reply('Deixe sua dúvida que entraremos em contato o mais rápido possível 😉');
     }
 });
 
-const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`Bot rodando na porta ${port}`);
+    console.log(`🔥 Bot rodando na porta ${port}`);
 });
+
 
 
 
